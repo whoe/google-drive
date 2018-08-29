@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://caption"
+        class="com.company.googledrive.web.screens.Main"
+        messagesPack="com.company.googledrive.web.screens">
+    <dsContext>
+        <hierarchicalDatasource id="googleDriveDs"
+                                class="com.company.googledrive.entity.GoogleDriveFileEntity"
+                                hierarchyProperty="parent"
+                                refreshMode="NEVER"/>
+    </dsContext>
+    <dialogMode height="600"
+                width="800"/>
+    <layout>
+        <vbox spacing="true" expand="splitId" height="100%">
+            <multiUpload id="upload"
+                         align="BOTTOM_LEFT"
+                         caption="msg://upload"
+                         fileSizeLimit="500000"/>
+            <split id="splitId"
+                   orientation="horizontal"
+                   width="100%">
+                <treeTable id="files"
+                           height="100%"
+                           width="100%">
+                    <columns>
+                        <column id="name"/>
+                        <column id="mime"/>
+                    </columns>
+                    <rows datasource="googleDriveDs"/>
+                </treeTable>
+            </split>
+        </vbox>
+    </layout>
+</window>

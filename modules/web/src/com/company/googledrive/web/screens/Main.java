@@ -2,18 +2,21 @@ package com.company.googledrive.web.screens;
 
 import com.company.googledrive.entity.GoogleDriveFileEntity;
 import com.company.googledrive.storage.GoogleStorage;
-import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.model.File;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.components.AbstractWindow;
+import com.haulmont.cuba.gui.components.BrowserFrame;
 import com.haulmont.cuba.gui.components.FileMultiUploadField;
+import com.haulmont.cuba.gui.components.UrlResource;
 import com.haulmont.cuba.gui.data.DataSupplier;
 import com.haulmont.cuba.gui.data.HierarchicalDatasource;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 
 import javax.inject.Inject;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 public class Main extends AbstractWindow {
@@ -35,6 +38,9 @@ public class Main extends AbstractWindow {
 
     @Inject
     private DataSupplier dataSupplier;
+
+    @Inject
+    private BrowserFrame docsViewerFrame;
 
     @Override
     public void init(Map<String, Object> params) {
@@ -58,7 +64,6 @@ public class Main extends AbstractWindow {
             recursiveIncludeParent(entity, fileById, includedEntityById);
             GoogleDriveFileEntity parentEntity = includedEntityById.get(entity.getParents());
             entity.setParent(parentEntity);
-
         }
 
 
@@ -84,6 +89,19 @@ public class Main extends AbstractWindow {
 
         upload.addFileUploadErrorListener(event ->
                 showNotification("File upload error", NotificationType.HUMANIZED));
+
+        googleDriveDs.addItemChangeListener(e -> {
+            String fileId = e.getItem().getFileId();
+            String urlString = String.format("https://drive.google.com/file/d/%s/preview", fileId);
+
+            URL url = null;
+            try {
+                url = new URL(urlString);
+            } catch (MalformedURLException e1) {
+                e1.printStackTrace();
+            }
+            docsViewerFrame.setSource(UrlResource.class).setUrl(url);
+        });
     }
 
     private void recursiveIncludeParent(GoogleDriveFileEntity entity,

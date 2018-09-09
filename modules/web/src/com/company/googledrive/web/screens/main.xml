@@ -7,7 +7,8 @@
         <hierarchicalDatasource id="googleDriveDs"
                                 class="com.company.googledrive.entity.GoogleDriveFileEntity"
                                 hierarchyProperty="parent"
-                                refreshMode="NEVER"/>
+                                refreshMode="NEVER"
+                                allowCommit="false"/>
     </dsContext>
     <dialogMode height="600"
                 width="800"/>
@@ -29,6 +30,10 @@
                     </columns>
                     <rows datasource="googleDriveDs"/>
                 </treeTable>
+                <browserFrame id="docsViewerFrame"
+                              width="100%"
+                              height="100%"
+                              align="MIDDLE_CENTER"/>
             </split>
         </vbox>
     </layout>

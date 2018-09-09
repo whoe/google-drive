@@ -1,6 +1,5 @@
 package com.company.googledrive.bean;
 
-import com.company.googledrive.storage.GoogleDriveFileStorageWithoutInterface;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -35,7 +34,7 @@ import static com.haulmont.cuba.core.global.FileStorageException.Type.*;
  *
  * @author adiatullin
  */
-public class GoogleDriveFileStorage extends GoogleDriveFileStorageWithoutInterface implements FileStorageAPI {
+public class GoogleDriveFileStorage implements FileStorageAPI {
 
     private static final Logger log = LoggerFactory.getLogger(GoogleDriveFileStorage.class);
 

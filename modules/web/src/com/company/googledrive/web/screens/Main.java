@@ -6,13 +6,12 @@ import com.google.api.services.drive.model.File;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.gui.components.AbstractWindow;
-import com.haulmont.cuba.gui.components.BrowserFrame;
-import com.haulmont.cuba.gui.components.FileMultiUploadField;
-import com.haulmont.cuba.gui.components.UrlResource;
+import com.haulmont.cuba.core.global.Resources;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.data.DataSupplier;
 import com.haulmont.cuba.gui.data.HierarchicalDatasource;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
+import com.haulmont.cuba.gui.xml.layout.ComponentsFactory;
 
 import javax.inject.Inject;
 import java.net.MalformedURLException;
@@ -22,13 +21,13 @@ import java.util.*;
 public class Main extends AbstractWindow {
 
     @Inject
-    FileMultiUploadField upload;
+    private FileMultiUploadField upload;
 
     @Inject
-    HierarchicalDatasource<GoogleDriveFileEntity, UUID> googleDriveDs;
+    private HierarchicalDatasource<GoogleDriveFileEntity, UUID> googleDriveDs;
 
     @Inject
-    GoogleStorage googleStorage;
+    private GoogleStorage googleStorage;
 
     @Inject
     private Metadata metadata;
@@ -41,6 +40,14 @@ public class Main extends AbstractWindow {
 
     @Inject
     private BrowserFrame docsViewerFrame;
+
+    @Inject
+    private ComponentsFactory componentsFactory;
+
+    @Inject
+    protected Resources resources;
+
+    private HashMap<String, String> mimeToResourcePath;
 
     @Override
     public void init(Map<String, Object> params) {
@@ -65,7 +72,6 @@ public class Main extends AbstractWindow {
             GoogleDriveFileEntity parentEntity = includedEntityById.get(entity.getParents());
             entity.setParent(parentEntity);
         }
-
 
         upload.addQueueUploadCompleteListener(() -> {
             for (Map.Entry<UUID, String> entry : upload.getUploadsMap().entrySet()) {
@@ -102,6 +108,8 @@ public class Main extends AbstractWindow {
             }
             docsViewerFrame.setSource(UrlResource.class).setUrl(url);
         });
+
+        mimeToResourcePath = initMimeToResourcePath();
     }
 
     private void recursiveIncludeParent(GoogleDriveFileEntity entity,
@@ -131,5 +139,29 @@ public class Main extends AbstractWindow {
         fileEntity.setParents(parentsString);
 
         return fileEntity;
+    }
+
+    private HashMap<String, String> initMimeToResourcePath() {
+        HashMap<String, String> mtr = new HashMap<>();
+        String formatString = "com/company/googledrive/web/screens/images/%s";
+        mtr.put("application/vnd.google-apps.document", String.format(formatString, "doc.png"));
+        mtr.put("application/vnd.google-apps.spreadsheet", String.format(formatString, "xls.png"));
+        mtr.put("application/vnd.google-apps.folder", String.format(formatString, "folder.png"));
+        mtr.put("application/pdf", String.format(formatString, "pdf.png"));
+
+        return mtr;
+    }
+
+    public Component generateIconCell(GoogleDriveFileEntity entity) {
+        String mime = entity.getMime();
+        if (!mimeToResourcePath.containsKey(mime)) {
+            return null;
+        }
+
+        Image image = componentsFactory.createComponent(Image.class);
+        image.setScaleMode(Image.ScaleMode.NONE);
+        image.setSource(ClasspathResource.class)
+                .setPath(mimeToResourcePath.get(mime));
+        return image;
     }
 }

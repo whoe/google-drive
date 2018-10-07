@@ -5,15 +5,17 @@
         messagesPack="com.company.googledrive.web.screens">
     <dsContext>
         <hierarchicalDatasource id="googleDriveDs"
+                                allowCommit="false"
                                 class="com.company.googledrive.entity.GoogleDriveFileEntity"
                                 hierarchyProperty="parent"
-                                refreshMode="NEVER"
-                                allowCommit="false"/>
+                                refreshMode="NEVER"/>
     </dsContext>
     <dialogMode height="600"
                 width="800"/>
     <layout>
-        <vbox spacing="true" expand="splitId" height="100%">
+        <vbox expand="splitId"
+              height="100%"
+              spacing="true">
             <multiUpload id="upload"
                          align="BOTTOM_LEFT"
                          caption="msg://upload"
@@ -26,14 +28,18 @@
                            width="100%">
                     <columns>
                         <column id="name"/>
-                        <column id="mime"/>
+                        <column id="mime"
+                                collapsed="true"/>
+                        <column id="icon"
+                                caption="msg://icon"
+                                generator="generateIconCell"
+                                width="32"/>
                     </columns>
                     <rows datasource="googleDriveDs"/>
                 </treeTable>
                 <browserFrame id="docsViewerFrame"
-                              width="100%"
                               height="100%"
-                              align="MIDDLE_CENTER"/>
+                              width="100%"/>
             </split>
         </vbox>
     </layout>

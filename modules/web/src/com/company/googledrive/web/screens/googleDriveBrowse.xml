@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
-        caption="msg://caption"
-        class="com.company.googledrive.web.screens.Main"
+        caption="msg://gdrive_browse"
+        class="com.company.googledrive.web.screens.GoogleDriveBrowse"
         messagesPack="com.company.googledrive.web.screens">
     <dsContext>
         <hierarchicalDatasource id="googleDriveDs"
@@ -11,20 +11,27 @@
                                 refreshMode="NEVER"/>
     </dsContext>
     <dialogMode height="600"
-                width="800"/>
+                width="1000"/>
     <layout>
         <vbox expand="splitId"
               height="100%"
               spacing="true">
-            <multiUpload id="upload"
-                         align="BOTTOM_LEFT"
-                         caption="msg://upload"
-                         fileSizeLimit="500000"/>
+            <hbox id="topButtonsHbox"
+                  spacing="true">
+                <multiUpload id="upload"
+                             align="BOTTOM_LEFT"
+                             caption="msg://upload"
+                             fileSizeLimit="500000"/>
+                <button id="deleteBtn"
+                        caption="msg://delete"/>
+            </hbox>
             <split id="splitId"
                    orientation="horizontal"
                    width="100%">
                 <treeTable id="files"
                            height="100%"
+                           multiLineCells="true"
+                           responsive="true"
                            width="100%">
                     <columns>
                         <column id="name"/>

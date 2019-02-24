@@ -2,6 +2,6 @@
 <menu-config xmlns="http://schemas.haulmont.com/cuba/menu.xsd">
     <menu id="googledrive"
           insertBefore="administration">
-        <item screen="main"/>
+        <item screen="googleDriveBrowse"/>
     </menu>
 </menu-config>

@@ -10,10 +10,12 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
-import java.io.StringReader;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -37,6 +39,37 @@ public class GoogleStorage {
         }
 
         return files;
+    }
+
+    public List<File> getFiles(List<String> fileIds) {
+        List<File> files = new ArrayList<>();
+        try {
+            Drive service = getDrive();
+            fileIds.forEach(fileId->{
+                try {
+                    File file = service.files().get(fileId)
+                            .setFields("id, name, parents, mimeType")
+                            .execute();
+                    files.add(file);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return files;
+    }
+
+    public InputStream getInputStreamForFile(String fileId) throws Exception {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        getDrive().files().get(fileId)
+                .executeMediaAndDownloadTo(outputStream);
+
+        return new ByteArrayInputStream(outputStream.toByteArray());
     }
 
     /**

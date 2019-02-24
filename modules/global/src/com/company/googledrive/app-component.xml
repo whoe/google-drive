@@ -21,6 +21,10 @@
                   value="+com/company/googledrive/spring.xml"/>
         <property name="cuba.mainMessagePack"
                   value="+com.company.googledrive.core"/>
+        <artifact classifier="db"
+                  configuration="dbscripts"
+                  ext="zip"
+                  name="googledrive-core"/>
     </module>
     <module blocks="web"
             dependsOn="global"

@@ -1,5 +1,7 @@
 package com.company.googledrive.bean;
 
+import com.company.googledrive.entity.ExtFileDescriptor;
+import com.company.googledrive.service.UploadHelperService;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -25,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.io.*;
 import java.net.URLConnection;
-import java.util.Collections;
+import java.util.*;
 
 import static com.haulmont.cuba.core.global.FileStorageException.Type.*;
 
@@ -42,6 +44,9 @@ public class GoogleDriveFileStorage implements FileStorageAPI {
 
     @Inject
     protected GoogleDriveConfig config;
+
+    @Inject
+    protected UploadHelperService uploadHelperService;
 
     @Override
     public long saveStream(FileDescriptor fd, InputStream inputStream) throws FileStorageException {
@@ -69,16 +74,18 @@ public class GoogleDriveFileStorage implements FileStorageAPI {
             String type = URLConnection.guessContentTypeFromName(fd.getName());
 
             File googleFile = new File();
-            googleFile.setName(fd.getId().toString());
+            String fName=fd.getName().substring(fd.getName().lastIndexOf('/')+1);
+            googleFile.setName(fName);
             googleFile.setMimeType(type);
             String folderId = getFolderId(drive, fd);
             if (!StringUtils.isEmpty(folderId)) {
                 googleFile.setParents(Collections.singletonList(folderId));
             }
 
-            drive.files().create(googleFile, new ByteArrayContent(type, data))
+            File createdFile=drive.files().create(googleFile, new ByteArrayContent(type, data))
                     .setFields("id")
                     .execute();
+            uploadHelperService.addJustUploadedFile(fd.getName(),createdFile.getId());
         } catch (Exception e) {
             throw new RuntimeException("Failed to save file", e);
         }
@@ -152,10 +159,22 @@ public class GoogleDriveFileStorage implements FileStorageAPI {
         String fileStorage = config.getFileStorageFolder();
         if (!StringUtils.isEmpty(fileStorage)) {
             String[] fileStoragePath = fileStorage.split("\\/");
-            for (String pathPart : fileStoragePath) {
+            String t="\\\\";t=t.substring(1);
+            String[] filePath=fd.getName().split("/");
+            List<String> allPath= new ArrayList<>(Arrays.asList(fileStoragePath));
+            if(filePath.length>0){
+                allPath.addAll(Arrays.asList(filePath));
+                allPath.remove(allPath.get(allPath.size()-1)); //remove file name
+            }
+
+            for (String pathPart : allPath) {
                 if (!StringUtils.isBlank(pathPart)) {
-                    FileList list = drive.files().list().setQ(
-                            String.format("mimeType='%s' and name='%s' and trashed=false", folderType, pathPart)).execute();
+                    FileList list = folderId!=null?
+                            drive.files().list().setQ(
+                                String.format("mimeType='%s' and name='%s' and trashed=false and '" + folderId + "' in parents", folderType, pathPart)).execute():
+                            drive.files().list().setQ(
+                                String.format("mimeType='%s' and name='%s' and trashed=false ", folderType, pathPart)).execute();
+
                     if (list == null || CollectionUtils.isEmpty(list.getFiles())) {
                         File childFolder = new File().setName(pathPart).setMimeType(folderType);
                         if (!StringUtils.isEmpty(folderId)) {
@@ -163,7 +182,7 @@ public class GoogleDriveFileStorage implements FileStorageAPI {
                         }
                         File createdFolder = drive.files()
                                 .create(childFolder)
-                                .setFields("id")
+                                .setFields("id, name")
                                 .execute();
                         folderId = createdFolder.getId();
                     } else {
@@ -184,10 +203,9 @@ public class GoogleDriveFileStorage implements FileStorageAPI {
      * @throws Exception in case of any unexpected problems
      */
     protected String getExternalId(Drive drive, FileDescriptor fd) throws Exception {
-        FileList list = drive.files().list().setQ(
-                String.format("name='%s' and trashed=false", fd.getId().toString())).execute();
-        if (list != null && !CollectionUtils.isEmpty(list.getFiles())) {
-            return list.getFiles().get(0).getId();
+        File file = drive.files().get(((ExtFileDescriptor)fd).getGdriveId()).execute();
+        if (file != null ) {
+            return file.getId();
         }
         throw new IllegalArgumentException(String.format("Failed to find external id for %s", fd.getName()));
     }

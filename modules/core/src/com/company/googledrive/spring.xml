@@ -9,4 +9,5 @@
     <context:component-scan base-package="com.company.googledrive"/>
     <bean name="cuba_FileStorage"
           class="com.company.googledrive.bean.GoogleDriveFileStorage"/>
+
 </beans>

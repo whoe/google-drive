@@ -15,4 +15,8 @@
             </map>
         </property>
     </bean>
+
+    <bean id="cuba_FileUploading"
+          class="com.company.googledrive.storage.ExtFileUploading"
+          />
 </beans>

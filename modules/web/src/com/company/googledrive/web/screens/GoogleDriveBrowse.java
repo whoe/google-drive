@@ -6,8 +6,10 @@ import com.company.googledrive.service.UploadHelperService;
 import com.company.googledrive.storage.GoogleStorage;
 import com.google.api.services.drive.model.File;
 import com.haulmont.bali.util.ParamsMap;
+import com.haulmont.cuba.client.sys.FileLoaderClientImpl;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
+import com.haulmont.cuba.core.sys.remoting.LocalFileExchangeService;
 import com.haulmont.cuba.gui.AppConfig;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
@@ -259,6 +261,7 @@ public class GoogleDriveBrowse extends AbstractWindow {
 
 
                 String googleFileId=uploadHelperService.getGoogleFileId(fd.getName());
+
                 if(googleFileId!=null){
                     fd.setGdriveId(googleFileId);
                     dataSupplier.commit(fd);

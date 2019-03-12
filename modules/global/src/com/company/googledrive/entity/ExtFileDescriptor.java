@@ -13,6 +13,18 @@ public class ExtFileDescriptor extends FileDescriptor {
     @Column(name = "GDRIVE_ID")
     protected String gdriveId;
 
+    @Column(name = "USE_DEFAULT_FILE_API")
+    protected Boolean useDefaultFileApi=false;
+
+    public void setUseDefaultFileApi(Boolean useDefaultFileApi) {
+        this.useDefaultFileApi = useDefaultFileApi;
+    }
+
+    public Boolean getUseDefaultFileApi() {
+        return useDefaultFileApi;
+    }
+
+
     public void setGdriveId(String gdriveId) {
         this.gdriveId = gdriveId;
     }

@@ -14,6 +14,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
+import com.google.api.services.drive.model.Permission;
 import com.haulmont.bali.util.Preconditions;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
@@ -88,6 +89,11 @@ class GoogleDriveFileWorker {
             String fName=fd.getName().substring(fd.getName().lastIndexOf('/')+1);
             googleFile.setName(fName);
             googleFile.setMimeType(type);
+           Permission permission = new Permission().
+                   setDomain("groupstp.ru").
+                   setRole("reader").
+                   setAllowFileDiscovery(true).
+                   setType("domain");
             String folderId = getFolderId(drive, fd);
             if (!StringUtils.isEmpty(folderId)) {
                 googleFile.setParents(Collections.singletonList(folderId));
@@ -96,6 +102,7 @@ class GoogleDriveFileWorker {
             File createdFile=drive.files().create(googleFile, new ByteArrayContent(type, data))
                     .setFields("id")
                     .execute();
+             Permission createdPermission = drive.permissions().create(createdFile.getId(), permission).execute();
             uploadHelperService.addJustUploadedFile(fd.getName(),createdFile.getId());
         } catch (Exception e) {
             throw new RuntimeException("Failed to save file", e);
